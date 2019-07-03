@@ -41,11 +41,13 @@ import com.zhilai.selfpickup.Util.SaxXml;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
+import java.sql.Time;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -321,9 +323,10 @@ public class MainActivity extends AppCompatActivity {
             final String message0 = lockerInterface.turnOnScanner(0, 1000 * 20, new IScannerCallback.Stub() {
                     @Override
                     public void onComplete(final String result)  {
-                         if(result!=null && Integer.parseInt(result)>=0 && Integer.parseInt(result)<Constant.cabinetTotalNum)
+                         if(result!=null )
                             try {
-                                lockerInterface.openLocker(Constant.getBoxId(Constant.cabinetTotalRow,Constant.cabinetTotalCol,"A")[Integer.parseInt(result)%16]);
+                                Log.d(TAG,"扫描结果"+result);
+                                lockerInterface.openLocker(Constant.getBoxId(Constant.cabinetTotalRow,Constant.cabinetTotalCol,"A")[Integer.parseInt(result)%Constant.cabinetTotalNum]);
                             } catch (RemoteException e) {
                                 e.printStackTrace();
                             }
@@ -387,7 +390,10 @@ public class MainActivity extends AppCompatActivity {
             final String message0 = lockerInterface.turnOnScanner(0, 1000 * 20, new IScannerCallback.Stub() {
                 @Override
                 public void onComplete(final String result) throws RemoteException {
-                    resultNo = result;
+                    if(result==null){
+                        resultNo = "!";
+                    } else
+                        resultNo = result;
                 }
             });
             scannerRet = new Gson().fromJson(message0,ScannerRet.class);
@@ -410,6 +416,13 @@ public class MainActivity extends AppCompatActivity {
                  switch (scannerRet.getResult_code()){
                      case 0:
                          dealWithMa(resultNo);
+                         try {
+                             TimeUnit.SECONDS.sleep(20);
+                             if(resultNo==null || resultNo.equals("!"))
+                                 warningMessageShow("扫码超时");
+                         } catch (InterruptedException e) {
+                             e.printStackTrace();
+                         }
                          break;
                      default:
                          warningMessageShow(scannerRet.getError_msg());
@@ -425,6 +438,9 @@ public class MainActivity extends AppCompatActivity {
 
     //处理码
     private void dealWithMa(String m){
+        if(m==null || m.equals("!")){
+            return;
+        }
         if(isUser){
             dealWithTakeCode(m);
         }else{
