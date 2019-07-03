@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+ <ConfigInfo>
+     <HardInfo>
+          <ztgID>"100001"</ztgID>
+          <cabinetTotalRow>4</cabinetTotalRow>
+          <cabinetTotalCol>4</cabinetTotalCol>
+          <cabinetTotalNum>16</cabinetTotalNum>
+     </HardInfo>
+ </ConfigInfo>
